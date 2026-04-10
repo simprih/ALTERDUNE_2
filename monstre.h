@@ -16,7 +16,8 @@ class Monstre
     int mercy;
     int mercyGoal;
     string categorie;
-    vector<string> actionsDisponibles; 
+    // mettre un autre atttibut nbactionmax qui sera initialisé dans les constructeurs des classes filles
+    vector<string> actionsDisponibles; // mettre un vecteur d'action 
 
     public:
     // Constructeurs : 

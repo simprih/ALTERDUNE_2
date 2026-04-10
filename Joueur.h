@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "Item.h"
+#include "item.h"
 using namespace std;
 
 class Item; // declaration anticipée en vue de la méthode 

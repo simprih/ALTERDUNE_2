@@ -1,4 +1,4 @@
-#include "Joueur.h"
+#include "joueur.h"
 #include <iostream>
 #include <vector>
 using namespace std;
