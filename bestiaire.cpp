@@ -1,7 +1,7 @@
-#include "Bestiare.h"
+#include "bestiaire.h"
 #include <iostream>
 using namespace std;
-#include <windows.h>
+//#include <windows.h>
 
 void Bestiaire::ajouterMonstre(Monstre* monstre, string resultat)
 {

@@ -8,6 +8,7 @@ using namespace std;
 class Monstre
 {
     protected:
+    string nom;
     int hp;
     int hpMax;
     int atk;

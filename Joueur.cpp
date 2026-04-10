@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 using namespace std;
-#include <windows.h>
+//#include <windows.h>
 
 Joueur::Joueur()
 {
@@ -82,7 +82,7 @@ void Joueur::utiliserItem(int index)
     {
         cout << "Item invalide." << endl;
     }
-    else if(!index.estDisponible())
+    else if(!inventaire[index].estDisponible())
     {
         cout << "Plus de " << inventaire[index].getNom() << " disponible !" << endl;
     }
@@ -103,7 +103,7 @@ void Joueur::ajouterVictoire()
 }
 void Joueur::ajouterTue()
 {
-    nbTue++;
+    nbTues++;
 }
 void Joueur::ajouterEpargne()
 {

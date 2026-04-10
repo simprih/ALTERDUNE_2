@@ -11,7 +11,11 @@ int main() {
 
     // Chargement des fichiers
     vector<Item> items = ChargeurCSV::chargerItems("items.csv");
+<<<<<<< HEAD
     vector<Monstre*> monstres = ChargeurCSV::chargerMonstres("monsters.csv");
+=======
+    //vector<Monstre*> monstres = ChargeurCSV::chargerMonstres("monsters.csv");
+>>>>>>> 338dbe3 (5_fichier main et correction, le code compile)
 
     // Création du joueur
     string nom;
@@ -30,6 +34,7 @@ int main() {
     joueur.afficherStats();
     joueur.afficherInventaire();
 
+<<<<<<< HEAD
     cout << "\n=== Monstres disponibles ===" << endl;
     for (Monstre* m : monstres) {
         m->afficher();
@@ -40,6 +45,18 @@ int main() {
     for (Monstre* m : monstres) {
         delete m;
     }
+=======
+    // cout << "\n=== Monstres disponibles ===" << endl;
+    // for (Monstre* m : monstres) {
+    //     m->afficher();
+    //     cout << endl;
+    // }
+
+    // // Libération mémoire
+    // for (Monstre* m : monstres) {
+    //     delete m;
+    // }
+>>>>>>> 338dbe3 (5_fichier main et correction, le code compile)
 
     return 0;
 }

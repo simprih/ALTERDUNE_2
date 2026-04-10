@@ -3,10 +3,10 @@
 
 #include <vector>
 #include <string>
-//#include "Monstre.h"
+#include "monstre.h"
 using namespace std;
 
-class Bestiare 
+class Bestiaire 
 {
     private:
     vector<pair<Monstre*, string>> monstresVaincus; // vecteur sous la forme : Monstre + "Tué" ou "Épargné"

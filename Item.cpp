@@ -29,7 +29,7 @@ bool Item::estDisponible() const
     return quantite > 0;
 }
 
-void Item::afficher()
+void Item::afficher() const
 {
 
     cout << nom << " (" << type << ") - Soigne " << valeur << " HP - Quantité : " << quantite << endl;
