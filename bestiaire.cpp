@@ -8,7 +8,7 @@ void Bestiaire::ajouterMonstre(Monstre* monstre, string resultat)
     monstresVaincus.push_back(make_pair(monstre, resultat));
 }
 
-void Bestiare::afficher() const 
+void Bestiaire::afficher() const 
 {
     if(estVide())
     {
