@@ -25,5 +25,8 @@ vector<Item> ChargeurCSV::chargerItems(const string& fichier) {
     }
 
     file.close();
+
+    cout << items.size() << " items charges depuis " << fichier << endl;
+
     return items;
 }

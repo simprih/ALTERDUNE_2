@@ -32,5 +32,5 @@ bool Item::estDisponible() const
 void Item::afficher() const
 {
 
-    cout << nom << " (" << type << ") - Soigne " << valeur << " HP - Quantité : " << quantite << endl;
+    cout << nom << " (" << type << ") - Soigne " << valeur << " HP - Quantite : " << quantite << endl;
 }

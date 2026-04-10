@@ -91,7 +91,7 @@ void Joueur::utiliserItem(int index)
         if (inventaire[index].getType() == "HEAL") 
         {
             soigner(inventaire[index].getValeur());
-            cout << "Vous utilisez " << inventaire[index].getNom() << " et récupérez " << inventaire[index].getValeur() << " HP !" << endl;
+            cout << "Vous utilisez " << inventaire[index].getNom() << " et recuperez " << inventaire[index].getValeur() << " HP !" << endl;
         }
         inventaire[index].reduireQuantite();
     }
@@ -115,8 +115,8 @@ void Joueur::afficherStats() const
     cout << "=== Stats de " << nom << " ===" << endl;
     cout << "HP : " << hp << "/" << hpMax << endl;
     cout << "Victoires : " << nbVictoires << "/10" << endl;
-    cout << "Monstres tués : " << nbTues << endl;
-    cout << "Monstres épargnés : " << nbEpargnes << endl;
+    cout << "Monstres tues : " << nbTues << endl;
+    cout << "Monstres epargnes : " << nbEpargnes << endl;
 }
 
 void Joueur::afficherInventaire() const
