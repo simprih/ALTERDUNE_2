@@ -1,7 +1,6 @@
 #include "monstre.h"
 #include <iostream>
 using namespace std;
-//#include <windows.h>
 
 Monstre::Monstre(string nom, string categorie, int hp, int atk, int def, int mercyGoal, vector<string> actions) {
     this->nom = nom;

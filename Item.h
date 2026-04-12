@@ -20,9 +20,6 @@ class Item
     int getValeur()const;
     int getQuantite()const;
 
-    //Setters :
-    void setNom();
-
     // Méthodes :
     void reduireQuantite(); // enleve 1 à quantite
     bool estDisponible() const; // retourne true si quantite > 0

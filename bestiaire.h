@@ -12,6 +12,8 @@ class Bestiaire
     vector<pair<Monstre*, string>> monstresVaincus; // vecteur sous la forme : Monstre + "Tué" ou "Épargné"
 
     public:
+    ~Bestiaire();
+
     //Méthodes
     void ajouterMonstre(Monstre* monstre, string resultat);
     void afficher() const;

@@ -2,7 +2,6 @@
 #include <iostream>
 #include <vector>
 using namespace std;
-//#include <windows.h>
 
 Joueur::Joueur()
 {
@@ -33,27 +32,7 @@ int Joueur::getNbTues() const {return nbTues;}
 int Joueur::getNbEpargnes() const{return nbEpargnes;}
 vector<Item>& Joueur::getInventaire(){return inventaire;}
 
-// Setters : 
-// void Joueur::setNom(const string& n){ nom = n;}
-// void Joueur::setHp(int h)
-// {
-//     if(h<0){hp=0;}
-//     else if(h>hpMax){hp = hpMax;}
-//     else{hp = h;}
-// }
-// void Joueur::setHpMax(int hmax)
-// {
-//     hpMax = hmax;
-//     if(hp>hpMax){hp=hpMax;}
-// }
-// void Joueur::setNbVictoires(int nbV){nbVictoires = nbV;}
-// void Joueur::setNbTues(int nbT){nbTues = nbT;}
-// void Joueur::setNbEpargnes(int nbE){nbTues = nbE;}
-// void Joueur::setInventaire(const vector<Item>& inv){inventaire = inv}
-
-
-
-// Méthodes : 
+// Méthodes :
 bool Joueur::estVivant() const
 {
     return hp>0;
@@ -78,7 +57,7 @@ void Joueur::ajouterItem(Item& item)
 
 void Joueur::utiliserItem(int index)
 {
-    if(index < 0 || index >= inventaire.size())
+    if(index < 0 || index >= (int)inventaire.size())
     {
         cout << "Item invalide." << endl;
     }
@@ -124,21 +103,16 @@ void Joueur::afficherInventaire() const
     cout << "=== Inventaire ===" << endl;
     if(inventaire.empty())
     {
-        cout << "Ancun item disponible" << endl;
+        cout << "Aucun item disponible" << endl;
     }
     else
     {
-        for (int i = 0; i < inventaire.size(); i++)
+        for (int i = 0; i < (int)inventaire.size(); i++)
         {
             cout << i+1 << ". ";
             inventaire[i].afficher();
         }
     }
-    
 }
-
-
-
-
 
 

@@ -6,8 +6,6 @@
 #include "item.h"
 using namespace std;
 
-class Item; // declaration anticipée en vue de la méthode 
-
 class Joueur
 {
     private:
@@ -32,15 +30,6 @@ class Joueur
     int getNbTues() const;
     int getNbEpargnes() const;
     vector<Item>& getInventaire();
-
-    // Setters
-    void setNom(const string& nom);
-    void setHp(int hp);
-    void setHpMax(int hpMax);
-    void setNbVictoires(int nbVictoires);
-    void setNbTues(int nbTues);
-    void setNbEpargnes(int nbEpargnes);
-    void setInventaire(const vector<Item>& inventaire);
 
     // Méthodes
     bool estVivant()const;

@@ -42,6 +42,9 @@ class Monstre
     // Méthode virtuelle pour que la méthode du bon type de monstre soit appelée
     virtual void afficher() const = 0;
 
+    // Crée une copie fraîche du monstre (HP et Mercy réinitialisés)
+    virtual Monstre* cloner() const = 0;
+
     // Destructeur virtuel car sinon le destructeur du monstre peut ne pas être appelé correctement
     virtual ~Monstre() {}
 

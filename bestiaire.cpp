@@ -1,7 +1,12 @@
 #include "bestiaire.h"
 #include <iostream>
 using namespace std;
-//#include <windows.h>
+
+Bestiaire::~Bestiaire() {
+    for (auto& p : monstresVaincus) {
+        delete p.first;
+    }
+}
 
 void Bestiaire::ajouterMonstre(Monstre* monstre, string resultat)
 {
@@ -17,7 +22,7 @@ void Bestiaire::afficher() const
     else
     {
         cout << "=== Bestiaire ===" << endl;
-        for (int i = 0; i < monstresVaincus.size(); i++)
+        for (int i = 0; i < (int)monstresVaincus.size(); i++)
         {
             Monstre* m = monstresVaincus[i].first;
             string resultat = monstresVaincus[i].second;
