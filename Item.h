@@ -21,8 +21,9 @@ class Item
     int getQuantite()const;
 
     // Méthodes :
-    void reduireQuantite(); // enleve 1 à quantite
-    bool estDisponible() const; // retourne true si quantite > 0
+    void reduireQuantite();          // enleve 1 à quantite
+    void augmenterQuantite(int n);   // ajoute n à quantite
+    bool estDisponible() const;      // retourne true si quantite > 0
     void afficher() const;
 };
 

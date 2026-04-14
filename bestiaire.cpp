@@ -27,7 +27,7 @@ void Bestiaire::afficher() const
             Monstre* m = monstresVaincus[i].first;
             string resultat = monstresVaincus[i].second;
             cout << "--- Monstre " << i+1 << " ---" << endl;
-            m -> afficherStats();
+            m->afficherResume();
             cout << "Resultat : " << resultat << endl;
         }
     }

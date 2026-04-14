@@ -3,7 +3,9 @@
 using namespace std;
 
 Boss::Boss(string nom, int hp, int atk, int def, int mercyGoal, vector<string> actions)
-    : Monstre(nom, "BOSS", hp, atk, def, mercyGoal, actions) {}
+    : Monstre(nom, "BOSS", hp, atk, def, mercyGoal, actions) {
+    nbActionsMax = 4;
+}
 
 Monstre* Boss::cloner() const {
     return new Boss(*this);

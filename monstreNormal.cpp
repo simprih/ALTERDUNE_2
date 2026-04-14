@@ -3,7 +3,9 @@
 using namespace std;
 
 MonstreNormal::MonstreNormal(string nom, int hp, int atk, int def, int mercyGoal, vector<string> actions)
-    : Monstre(nom, "NORMAL", hp, atk, def, mercyGoal, actions) {}
+    : Monstre(nom, "NORMAL", hp, atk, def, mercyGoal, actions) {
+    nbActionsMax = 2;
+}
 
 Monstre* MonstreNormal::cloner() const {
     return new MonstreNormal(*this);

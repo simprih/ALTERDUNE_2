@@ -3,7 +3,9 @@
 using namespace std;
 
 MiniBoss::MiniBoss(string nom, int hp, int atk, int def, int mercyGoal, vector<string> actions)
-    : Monstre(nom, "MINIBOSS", hp, atk, def, mercyGoal, actions) {}
+    : Monstre(nom, "MINIBOSS", hp, atk, def, mercyGoal, actions) {
+    nbActionsMax = 3;
+}
 
 Monstre* MiniBoss::cloner() const {
     return new MiniBoss(*this);

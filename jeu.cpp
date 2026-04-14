@@ -3,6 +3,7 @@
 #include "actionAct.h"
 #include <iostream>
 #include <limits>
+#include <algorithm>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -61,9 +62,13 @@ int Jeu::calculerDegats(int hpMax) {
     return dist(rng);
 }
 
-// Efface le terminal (cross-platform via code ANSI)
+// Efface le terminal (cross-platform)
 void Jeu::effacerEcran() const {
-    cout << "\033[2J\033[H";
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
 }
 
 // Attend que l'utilisateur appuie sur Entree
@@ -132,19 +137,71 @@ void Jeu::menuItems() {
 }
 
 // ─── Menu Items (en combat) ───────────────────────────────────────────────────
-// Si l'utilisateur entre 0, le tour n'est pas consomme
+// Si l'utilisateur entre 0, le tour n'est pas consomme.
+// Les items MERCY_BOOST sont geres ici directement (necessitent le monstre courant).
 
-void Jeu::menuItemsCombat(bool& tourConsomme) {
+void Jeu::menuItemsCombat(bool& tourConsomme, Monstre* monstre) {
+    tourConsomme = false; // utiliser un item ne consomme jamais le tour du monstre
     cout << endl;
     joueur.afficherInventaire();
     cout << "  Numero de l'item (" << C_JAUNE << "0" << C_RESET << " = annuler) : ";
     int idx = lireEntier();
-    if (idx > 0) {
-        joueur.utiliserItem(idx - 1);
-    } else {
+    if (idx <= 0) {
         cout << C_JAUNE << "  Annulation. Le tour n'est pas consomme." << C_RESET << endl;
         tourConsomme = false;
+        return;
     }
+    int realIdx = idx - 1;
+    vector<Item>& inv = joueur.getInventaire();
+    if (realIdx >= (int)inv.size()) {
+        cout << "  Item invalide." << endl;
+        return;
+    }
+    if (!inv[realIdx].estDisponible()) {
+        cout << "  Plus de " << inv[realIdx].getNom() << " disponible !" << endl;
+        return;
+    }
+    if (inv[realIdx].getType() == "MERCY_BOOST") {
+        int gain = inv[realIdx].getValeur();
+        monstre->modifierMercy(gain);
+        inv[realIdx].reduireQuantite();
+        cout << C_JAUNE << "  Vous utilisez " << inv[realIdx].getNom()
+             << " : Mercy +" << gain << "  ->  "
+             << monstre->getMercy() << "/" << monstre->getMercyGoal()
+             << C_RESET << endl;
+    } else {
+        joueur.utiliserItem(realIdx);
+    }
+}
+
+// ─── Drop apres combat ────────────────────────────────────────────────────────
+// NORMAL  : 40% chance → Snack (HEAL)
+// MINIBOSS: 60% chance → Cristal de Mercy (MERCY_BOOST)
+// BOSS    : 80% chance → SuperPotion (HEAL)
+
+void Jeu::appliquerDrop(const Monstre* monstre) {
+    uniform_int_distribution<int> roll(1, 100);
+    int r = roll(rng);
+
+    const string& cat = monstre->getCategorie();
+    string nom, type;
+    int valeur;
+
+    if (cat == "NORMAL") {
+        if (r > 40) return;
+        nom = "Snack"; type = "HEAL"; valeur = 8;
+    } else if (cat == "MINIBOSS") {
+        if (r > 60) return;
+        nom = "Cristal de Mercy"; type = "MERCY_BOOST"; valeur = 25;
+    } else { // BOSS
+        if (r > 80) return;
+        nom = "SuperPotion"; type = "HEAL"; valeur = 30;
+    }
+
+    Item drop(nom, type, valeur, 1);
+    joueur.ajouterItem(drop);
+    cout << C_VERT << "  " << monstre->getNom() << " a laisse tomber : "
+         << nom << " !" << C_RESET << endl;
 }
 
 // ─── Combat ───────────────────────────────────────────────────────────────────
@@ -187,19 +244,26 @@ void Jeu::lancerCombat() {
 
         // ---- FIGHT ----
         if (choix == 1) {
-            int degats = calculerDegats(monstre->getHpMax());
+            // La DEF du monstre absorbe une partie des degats
+            int base = calculerDegats(monstre->getHpMax());
+            int degats = base - monstre->getDef();
+            if (degats < 0) degats = 0;
+
             if (degats == 0) {
-                cout << C_JAUNE << "  Votre attaque rate !" << C_RESET << endl;
+                cout << C_JAUNE << "  Votre attaque est absorbee par la DEF de "
+                     << monstre->getNom() << " !" << C_RESET << endl;
             } else {
                 monstre->subirDegats(degats);
                 cout << C_VERT << "  Vous infligez " << degats
-                     << " degats a " << monstre->getNom() << " !"
+                     << " degats a " << monstre->getNom()
+                     << " (DEF -" << monstre->getDef() << ")"
                      << C_RESET << endl;
             }
             if (!monstre->estVivant()) {
                 cout << C_ROUGE << C_GRAS << endl
                      << "  " << monstre->getNom() << " est vaincu !"
                      << C_RESET << endl;
+                appliquerDrop(monstre);
                 joueur.ajouterVictoire();
                 joueur.ajouterTue();
                 bestiaire.ajouterMonstre(monstre, "Tue");
@@ -210,12 +274,13 @@ void Jeu::lancerCombat() {
         // ---- ACT ----
         } else if (choix == 2) {
             const vector<string>& actions = monstre->getActions();
+            int nbActions = min(monstre->getNbActionsMax(), (int)actions.size());
             cout << C_CYAN << "  === Actions disponibles ===" << C_RESET << endl;
-            for (int i = 0; i < (int)actions.size(); i++) {
+            for (int i = 0; i < nbActions; i++) {
                 cout << "    " << i + 1 << ". " << actions[i] << endl;
             }
             int actChoix = 0;
-            while (actChoix < 1 || actChoix > (int)actions.size()) {
+            while (actChoix < 1 || actChoix > nbActions) {
                 cout << "  Choisissez : ";
                 actChoix = lireEntier();
             }
@@ -226,14 +291,21 @@ void Jeu::lancerCombat() {
                 it->second.afficher();
                 int impact = it->second.getImpactMercy();
                 monstre->modifierMercy(impact);
-                if (impact >= 0) {
+                if (impact > 0) {
                     cout << C_VERT << "  Mercy +" << impact << "  ->  "
                          << monstre->getMercy() << "/" << monstre->getMercyGoal()
                          << C_RESET << endl;
-                } else {
+                    cout << C_VERT << "  " << monstre->getNom()
+                         << " semble s'apaiser..." << C_RESET << endl;
+                } else if (impact < 0) {
                     cout << C_ROUGE << "  Mercy " << impact << "  ->  "
                          << monstre->getMercy() << "/" << monstre->getMercyGoal()
                          << C_RESET << endl;
+                    cout << C_ROUGE << "  " << monstre->getNom()
+                         << " se met en colere !" << C_RESET << endl;
+                } else {
+                    cout << C_JAUNE << "  " << monstre->getNom()
+                         << " reste indifferent." << C_RESET << endl;
                 }
             } else {
                 cout << "  Action inconnue dans le catalogue." << endl;
@@ -241,7 +313,7 @@ void Jeu::lancerCombat() {
 
         // ---- ITEM ----
         } else if (choix == 3) {
-            menuItemsCombat(tourConsomme);
+            menuItemsCombat(tourConsomme, monstre);
 
         // ---- MERCY ----
         } else {
@@ -249,6 +321,7 @@ void Jeu::lancerCombat() {
                 cout << C_VERT << C_GRAS << endl
                      << "  " << monstre->getNom() << " est epargne ! Vous gagnez !"
                      << C_RESET << endl;
+                appliquerDrop(monstre);
                 joueur.ajouterVictoire();
                 joueur.ajouterEpargne();
                 bestiaire.ajouterMonstre(monstre, "Epargne");
@@ -265,8 +338,28 @@ void Jeu::lancerCombat() {
 
         // ---- Tour du monstre ----
         if (!combatTermine && tourConsomme) {
-            int degats = calculerDegats(joueur.getHpMax());
             cout << endl;
+
+            // Hesitation du monstre selon son niveau de Mercy
+            bool hesitation = false;
+            if (monstre->getMercyGoal() > 0) {
+                float ratio = (float)monstre->getMercy() / (float)monstre->getMercyGoal();
+                int seuil = 0;
+                if (ratio >= 1.0f)       seuil = 75;
+                else if (ratio >= 0.66f) seuil = 50;
+                else if (ratio >= 0.33f) seuil = 25;
+                if (seuil > 0) {
+                    uniform_int_distribution<int> roll(1, 100);
+                    hesitation = roll(rng) <= seuil;
+                }
+            }
+            if (hesitation) {
+                cout << C_JAUNE << "  " << monstre->getNom()
+                     << " hesite et ne vous attaque pas ce tour !"
+                     << C_RESET << endl;
+            } else {
+            // L'ATK du monstre s'ajoute comme bonus aux degats de base
+            int degats = calculerDegats(joueur.getHpMax()) + monstre->getAtk() / 3;
             if (degats == 0) {
                 cout << C_JAUNE << "  " << monstre->getNom()
                      << " rate son attaque !" << C_RESET << endl;
@@ -274,7 +367,9 @@ void Jeu::lancerCombat() {
                 joueur.subirDegats(degats);
                 cout << C_ROUGE << "  " << monstre->getNom()
                      << " vous inflige " << degats << " degats !"
+                     << " (ATK +" << monstre->getAtk() / 3 << ")"
                      << C_RESET << endl;
+            }
             }
             if (!joueur.estVivant()) {
                 cout << C_ROUGE << C_GRAS << endl

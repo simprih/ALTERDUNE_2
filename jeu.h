@@ -25,9 +25,10 @@ private:
 
     // Phases de jeu
     void menuItems();
-    void menuItemsCombat(bool& tourConsomme);
+    void menuItemsCombat(bool& tourConsomme, Monstre* monstre);
     void lancerCombat();
     void afficherEtatCombat(const Monstre* monstre) const;
+    void appliquerDrop(const Monstre* monstre);
     void afficherFin() const;
 
 public:

@@ -16,28 +16,32 @@ class Monstre
     int mercy;
     int mercyGoal;
     string categorie;
-    // mettre un autre atttibut nbactionmax qui sera initialisé dans les constructeurs des classes filles
-    vector<string> actionsDisponibles; // mettre un vecteur d'action 
+    int nbActionsMax;                  // initialise dans chaque classe fille (2, 3, ou 4)
+    vector<string> actionsDisponibles;
 
     public:
     // Constructeurs : 
     Monstre(string nom, string categorie, int hp, int atk,int def, int mercyGoal, vector<string> actions);
 
-    //Getters : 
+    //Getters :
     string getNom() const;
     int getHp() const;
     int getHpMax() const;
+    int getAtk() const;
+    int getDef() const;
     int getMercy() const;
     int getMercyGoal() const;
     string getCategorie() const;
     vector<string> getActions() const;
+    int getNbActionsMax() const;
 
-    // Méthodes communes : 
+    // Méthodes communes :
     bool estVivant() const;
     bool peutEtreEpargne() const;    // mercy >= mercyGoal
     void modifierMercy(int valeur);  // modifie + borne entre 0 et mercyGoal
     void subirDegats(int degats);
     void afficherStats() const;
+    void afficherResume() const;     // stats originales pour le bestiaire
 
     // Méthode virtuelle pour que la méthode du bon type de monstre soit appelée
     virtual void afficher() const = 0;

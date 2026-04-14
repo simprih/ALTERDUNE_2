@@ -23,6 +23,11 @@ void Item::reduireQuantite()
     {
         quantite --;
     }
+}
+
+void Item::augmenterQuantite(int n)
+{
+    quantite += n;
 } 
 bool Item::estDisponible() const
 {
@@ -31,6 +36,11 @@ bool Item::estDisponible() const
 
 void Item::afficher() const
 {
-
-    cout << nom << " (" << type << ") - Soigne " << valeur << " HP - Quantite : " << quantite << endl;
+    if (type == "HEAL") {
+        cout << nom << " (HEAL) - Soigne " << valeur << " HP - Quantite : " << quantite << endl;
+    } else if (type == "MERCY_BOOST") {
+        cout << nom << " (MERCY_BOOST) - Mercy +" << valeur << " - Quantite : " << quantite << endl;
+    } else {
+        cout << nom << " (" << type << ") - Valeur : " << valeur << " - Quantite : " << quantite << endl;
+    }
 }

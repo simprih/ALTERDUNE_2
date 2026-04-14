@@ -50,8 +50,14 @@ void Joueur::soigner(int valeur)
     if(hp>hpMax){hp = hpMax;}
 }
 
-void Joueur::ajouterItem(Item& item) 
+void Joueur::ajouterItem(Item& item)
 {
+    for (Item& existing : inventaire) {
+        if (existing.getNom() == item.getNom()) {
+            existing.augmenterQuantite(item.getQuantite());
+            return;
+        }
+    }
     inventaire.push_back(item);
 }
 

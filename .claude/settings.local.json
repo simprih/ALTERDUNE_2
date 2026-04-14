@@ -7,7 +7,9 @@
       "Bash(pdftotext /Users/simonprihnenko/Desktop/cpp/ALTERDUNE/Projet.pdf -)",
       "Bash(g++ -Wall -Wextra -std=c++17 main.cpp chargeurCSV.cpp monstre.cpp monstreNormal.cpp miniboss.cpp boss.cpp joueur.cpp item.cpp bestiaire.cpp actionAct.cpp -o alterdune)",
       "Bash(g++ -Wall -Wextra -std=c++17 main.cpp jeu.cpp chargeurCSV.cpp monstre.cpp monstreNormal.cpp miniboss.cpp boss.cpp joueur.cpp item.cpp bestiaire.cpp actionAct.cpp -o alterdune)",
-      "Bash(./alterdune)"
+      "Bash(./alterdune)",
+      "Bash(g++ -std=c++17 -Wall -Wextra -o alterdune main.cpp jeu.cpp joueur.cpp monstre.cpp monstreNormal.cpp miniboss.cpp boss.cpp bestiaire.cpp item.cpp actionAct.cpp ChargeurCSV.cpp)",
+      "Bash(g++ -std=c++17 -Wall -Wextra -o alterdune main.cpp jeu.cpp Joueur.cpp monstre.cpp monstreNormal.cpp miniboss.cpp boss.cpp bestiaire.cpp item.cpp actionAct.cpp ChargeurCSV.cpp)"
     ]
   }
 }
