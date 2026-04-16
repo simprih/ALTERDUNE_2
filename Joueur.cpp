@@ -61,24 +61,32 @@ void Joueur::ajouterItem(Item& item)
     inventaire.push_back(item);
 }
 
-void Joueur::utiliserItem(int index)
+bool Joueur::utiliserItem(int index)
 {
     if(index < 0 || index >= (int)inventaire.size())
     {
         cout << "Item invalide." << endl;
+        return false;
     }
     else if(!inventaire[index].estDisponible())
     {
         cout << "Plus de " << inventaire[index].getNom() << " disponible !" << endl;
+        return false;
     }
     else 
     {
         if (inventaire[index].getType() == "HEAL") 
         {
+            if (hp >= hpMax)
+            {
+                cout << "Vous avez deja tous vos HP !" << endl;
+                return false;
+            }
             soigner(inventaire[index].getValeur());
             cout << "Vous utilisez " << inventaire[index].getNom() << " et recuperez " << inventaire[index].getValeur() << " HP !" << endl;
         }
         inventaire[index].reduireQuantite();
+        return true;
     }
 }
 
@@ -120,5 +128,3 @@ void Joueur::afficherInventaire() const
         }
     }
 }
-
-

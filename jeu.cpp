@@ -133,7 +133,11 @@ void Jeu::menuItems() {
     cout << "  Utiliser un item (numero) ou " << C_JAUNE << "0" << C_RESET
          << " pour revenir : ";
     int idx = lireEntier();
-    if (idx > 0) joueur.utiliserItem(idx - 1);
+    if (idx > 0) {
+        joueur.utiliserItem(idx - 1);
+        cout << endl << "  (Entree pour revenir)";
+        attendreEntree();
+    }
 }
 
 // ─── Menu Items (en combat) ───────────────────────────────────────────────────
@@ -141,7 +145,7 @@ void Jeu::menuItems() {
 // Les items MERCY_BOOST sont geres ici directement (necessitent le monstre courant).
 
 void Jeu::menuItemsCombat(bool& tourConsomme, Monstre* monstre) {
-    tourConsomme = false; // utiliser un item ne consomme jamais le tour du monstre
+    tourConsomme = false;
     cout << endl;
     joueur.afficherInventaire();
     cout << "  Numero de l'item (" << C_JAUNE << "0" << C_RESET << " = annuler) : ";
@@ -165,12 +169,13 @@ void Jeu::menuItemsCombat(bool& tourConsomme, Monstre* monstre) {
         int gain = inv[realIdx].getValeur();
         monstre->modifierMercy(gain);
         inv[realIdx].reduireQuantite();
+        tourConsomme = true;
         cout << C_JAUNE << "  Vous utilisez " << inv[realIdx].getNom()
              << " : Mercy +" << gain << "  ->  "
              << monstre->getMercy() << "/" << monstre->getMercyGoal()
              << C_RESET << endl;
     } else {
-        joueur.utiliserItem(realIdx);
+        tourConsomme = joueur.utiliserItem(realIdx);
     }
 }
 

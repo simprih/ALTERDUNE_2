@@ -36,7 +36,7 @@ class Joueur
     void subirDegats(int degats);
     void soigner(int valeur);
     void ajouterItem(Item& item);
-    void utiliserItem(int index);
+    bool utiliserItem(int index);
     void ajouterVictoire();
     void ajouterTue();
     void ajouterEpargne();
