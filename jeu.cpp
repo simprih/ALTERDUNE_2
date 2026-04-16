@@ -244,19 +244,15 @@ void Jeu::lancerCombat() {
 
         // ---- FIGHT ----
         if (choix == 1) {
-            // La DEF du monstre absorbe une partie des degats
-            int base = calculerDegats(monstre->getHpMax());
-            int degats = base - monstre->getDef();
-            if (degats < 0) degats = 0;
+            // degats = rand(0, HP_max_monstre) -- formule validee par l'enseignante
+            int degats = calculerDegats(monstre->getHpMax());
 
             if (degats == 0) {
-                cout << C_JAUNE << "  Votre attaque est absorbee par la DEF de "
-                     << monstre->getNom() << " !" << C_RESET << endl;
+                cout << C_JAUNE << "  Votre attaque rate !" << C_RESET << endl;
             } else {
                 monstre->subirDegats(degats);
                 cout << C_VERT << "  Vous infligez " << degats
                      << " degats a " << monstre->getNom()
-                     << " (DEF -" << monstre->getDef() << ")"
                      << C_RESET << endl;
             }
             if (!monstre->estVivant()) {
@@ -358,18 +354,14 @@ void Jeu::lancerCombat() {
                      << " hesite et ne vous attaque pas ce tour !"
                      << C_RESET << endl;
             } else {
-            // L'ATK du monstre s'ajoute comme bonus aux degats de base
-            int degats = calculerDegats(joueur.getHpMax()) + monstre->getAtk() / 3;
-            if (degats == 0) {
-                cout << C_JAUNE << "  " << monstre->getNom()
-                     << " rate son attaque !" << C_RESET << endl;
-            } else {
-                joueur.subirDegats(degats);
-                cout << C_ROUGE << "  " << monstre->getNom()
-                     << " vous inflige " << degats << " degats !"
-                     << " (ATK +" << monstre->getAtk() / 3 << ")"
-                     << C_RESET << endl;
-            }
+            // degats = ATK du monstre (valeur fixe depuis monsters.csv)
+            // Note : le sujet indique rand(0, HP_max), mais l'enseignante a confirme
+            // que l'attaque du monstre utilise directement sa valeur ATK.
+            int degats = monstre->getAtk();
+            joueur.subirDegats(degats);
+            cout << C_ROUGE << "  " << monstre->getNom()
+                 << " vous inflige " << degats << " degats !"
+                 << C_RESET << endl;
             }
             if (!joueur.estVivant()) {
                 cout << C_ROUGE << C_GRAS << endl
