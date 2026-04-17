@@ -87,6 +87,7 @@ private:
                        int val, int max, sf::Color fill,
                        sf::Color empty = sf::Color(50, 50, 50));
     void dessinerSeparateur(float y, sf::Color couleur = sf::Color::White);
+    void dessinerMonstre(const Monstre* m, float cx, float cy);
 
     // ── Renderers ────────────────────────────────────────────────────────────────
     void renderTitre();

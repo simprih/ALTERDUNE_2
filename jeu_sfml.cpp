@@ -4,6 +4,7 @@
 #include "item.h"
 #include <algorithm>
 #include <sstream>
+#include <cmath>
 
 // ─── Constantes de mise en page ───────────────────────────────────────────────
 static constexpr unsigned int WIN_W   = 900;
@@ -171,6 +172,195 @@ void JeuSFML::dessinerSeparateur(float y, sf::Color couleur) {
     ligne.setPosition({MARGIN, y});
     ligne.setFillColor(couleur);
     window.draw(ligne);
+}
+
+// ─── Rendu visuel des monstres ────────────────────────────────────────────────
+//
+// Chaque monstre est dessiné avec des formes SFML (aucun asset externe).
+// Les coordonnées dx/dy des helpers R() et C() sont relatives au centre (cx, cy).
+//
+// Animations :
+//   NORMAL   — flottement vertical doux  (sinf * 5 px)
+//   MINIBOSS — flottement plus ample     (sinf * 8 px)
+//   BOSS     — pulsation lumineuse + léger tangage (sinf * 3 px)
+//
+// L'ombre reste au sol (cy0) pendant que le monstre flotte.
+
+void JeuSFML::dessinerMonstre(const Monstre* m, float cx, float cy) {
+    const std::string& cat = m->getCategorie();
+    const std::string& nom = m->getNom();
+    float t   = static_cast<float>(frameCount) * 0.05f;
+    float cy0 = cy;   // position sol fixe (pour l'ombre)
+
+    // ── Animation par catégorie ───────────────────────────────────────────────
+    if      (cat == "NORMAL")   cy += sinf(t)        *  5.f;
+    else if (cat == "MINIBOSS") cy += sinf(t * 1.4f) *  8.f;
+    else                        cy += sinf(t * 0.6f) *  3.f;
+
+    // ── Ombre au sol (ne suit pas le flottement) ──────────────────────────────
+    {
+        float sw = (cat == "BOSS") ? 88.f : (cat == "MINIBOSS") ? 60.f : 40.f;
+        float so = (cat == "BOSS") ? 70.f : (cat == "MINIBOSS") ? 55.f : 42.f;
+        sf::RectangleShape shad({sw, 5.f});
+        shad.setPosition({cx - sw * .5f, cy0 + so});
+        shad.setFillColor(sf::Color(10, 10, 10, 85));
+        window.draw(shad);
+    }
+
+    // ── Helpers : rectangle et cercle centrés sur (cx+dx, cy+dy) ─────────────
+    auto R = [&](float dx, float dy, float w, float h, sf::Color c) {
+        sf::RectangleShape s({w, h});
+        s.setPosition({cx + dx - w * .5f, cy + dy - h * .5f});
+        s.setFillColor(c);
+        window.draw(s);
+    };
+    auto C = [&](float dx, float dy, float r, sf::Color c) {
+        sf::CircleShape s(r);
+        s.setPosition({cx + dx - r, cy + dy - r});
+        s.setFillColor(c);
+        window.draw(s);
+    };
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // FROGGIT — petite grenouille verte (NORMAL)
+    // ─────────────────────────────────────────────────────────────────────────
+    if (nom == "Froggit") {
+        sf::Color body(55, 170, 55), belly(90, 210, 80),
+                  eye(240, 245, 220), pupil(20, 55, 20);
+        C(-16, -30, 10, body);           C( 16, -30, 10, body);    // bosses yeux
+        C(  0, -10, 28, body);                                      // corps
+        C(-16, -28,  9, eye);            C( 16, -28,  9, eye);     // blancs
+        C(-16, -28,  5, pupil);          C( 16, -28,  5, pupil);   // pupilles
+        R(  0,   8, 36, 12, belly);                                 // ventre
+        R(-20,  34, 15,  8, body);       R( 20,  34, 15,  8, body); // pattes
+        R(-28,  40, 22,  7, body);       R( 28,  40, 22,  7, body); // pieds
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // WHIMSUN — fantôme-papillon translucide (NORMAL)
+    // ─────────────────────────────────────────────────────────────────────────
+    else if (nom == "Whimsun") {
+        sf::Color bdy(205, 205, 240), wing(155, 155, 255, 148),
+                  dot(70, 70, 190), wisp(185, 185, 230, 115);
+        C(-34, -18, 22, wing);           C( 34, -18, 22, wing);    // ailes
+        C(  0, -14, 22, bdy);                                       // tête
+        R(  0,  10, 32, 38, bdy);                                   // corps
+        C( -8, -17,  5, dot);            C(  8, -17,  5, dot);     // yeux
+        C(-10,  34,  8, wisp);           C(  0,  38,  7, wisp);    // queue
+        C( 10,  34,  8, wisp);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // MIMICBOX — coffre-mimic avec yeux rougeoyants (MINIBOSS)
+    // ─────────────────────────────────────────────────────────────────────────
+    else if (nom == "MimicBox") {
+        float eg = 0.5f + sinf(t * 2.5f) * 0.5f;   // pulsation des yeux
+        sf::Color wood(148, 88, 28), lid(105, 58, 15), metal(182, 162, 82);
+        sf::Color eyeC((int)(240*eg), (int)(45*eg), 12);
+        sf::Color reflet(255, std::min(255, (int)(80 + 175*eg)), 40);
+
+        R(  0,  18, 84, 56, wood);              // corps du coffre
+        R(  0, -18, 84, 28, lid);               // couvercle
+        R(  0,   2, 84,  6, metal);             // bande métal centrale
+        R(  0, -28, 84,  5, metal);             // bord couvercle
+        R(  0, -22, 18, 14, metal);             // serrure (boîtier)
+        R(  0, -19,  9,  9, sf::Color(50,35,10)); // trou serrure
+        C(-20,  15, 10, eyeC);                  // œil gauche (glow)
+        C( 20,  15, 10, eyeC);                  // œil droit  (glow)
+        C(-20,  15,  5, reflet);                // reflet gauche
+        C( 20,  15,  5, reflet);                // reflet droit
+        for (int i = -3; i <= 3; ++i)           // dents
+            R(i * 12.f, 2, 6, 10, sf::Color(232, 228, 218));
+        R(-34,  49, 18, 10, lid);               // pied gauche
+        R( 34,  49, 18, 10, lid);               // pied droit
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // SHYREN — sirène-poisson musicale (MINIBOSS)
+    // ─────────────────────────────────────────────────────────────────────────
+    else if (nom == "Shyren") {
+        float swx = sinf(t * 2.2f) * 4.f;   // balancement de la queue
+        sf::Color bdy(38, 135, 210), fin(18, 88, 165),
+                  eyeW(240, 240, 252), eyeP(22, 42, 170);
+        R( swx,       50, 56, 14, fin);      // queue
+        R( swx - 18,  38, 22, 18, bdy);      // base queue gauche
+        R( swx + 18,  38, 22, 18, bdy);      // base queue droite
+        C(  0,   5, 36, bdy);                // corps
+        R( -4, -52, 10, 22, fin);            // nageoire dorsale (tige)
+        R(  0, -44, 20, 14, fin);            // nageoire dorsale (base)
+        C(-14,   2, 10, eyeW);               C( 14,  2, 10, eyeW); // yeux blancs
+        C(-14,   2,  5, eyeP);               C( 14,  2,  5, eyeP); // pupilles
+        dessinerTexte(u8"\u266A", 15,
+                      sf::Color(255, 218, 75, 205),
+                      cx + 28.f, cy - 56.f);  // ♪
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // QUEENBYTE — reine mécanique des circuits (BOSS)
+    // ─────────────────────────────────────────────────────────────────────────
+    else if (nom == "QueenByte") {
+        float g = 0.62f + sinf(t * 1.8f) * 0.38f;   // pulsation lumineuse
+        sf::Color bdy(52, 0, 82), lit(98, 28, 140), crown(212, 152, 0);
+        sf::Color eyeC((int)(255*g), (int)(198*g), 0);
+        sf::Color cir(115, 50, 170, 162);
+
+        // Aura pulsante (dessinée en premier, derrière tout)
+        {
+            sf::CircleShape aura(68.f);
+            aura.setPosition({cx - 68.f, cy - 68.f});
+            aura.setFillColor(sf::Color(95, 0, 155, (int)(40 * g)));
+            window.draw(aura);
+        }
+
+        // Couronne — 5 pointes (la centrale est la plus haute)
+        R(-38, -94, 10, 38, crown);  R(-18,-100, 10, 38, crown);
+        R(  0,-106, 12, 44, crown);
+        R( 18,-100, 10, 38, crown);  R( 38, -94, 10, 38, crown);
+        // Gemmes
+        C(-33, -74,  6, sf::Color(255,  50,  50));
+        C(-13, -81,  6, sf::Color( 50, 200, 255));
+        C(  0, -85,  7, sf::Color(255, 228,   0));
+        C( 13, -81,  6, sf::Color( 50, 255, 100));
+        C( 33, -74,  6, sf::Color(218,  50, 255));
+
+        // Tête
+        C(0, -42, 32, lit);
+
+        // Yeux lumineux
+        C(-14, -46,  9, eyeC);       C( 14, -46,  9, eyeC);
+        C(-14, -46,  4, sf::Color(255, 255, 220));
+        C( 14, -46,  4, sf::Color(255, 255, 220));
+
+        // Corps
+        R(  0,  -4, 92, 72, bdy);
+        R(  0, -14, 72, 16, lit);    // haut du corps / épaules
+
+        // Lignes de circuit
+        R(  0,   5, 62,  3, cir);    R(  0,  20, 62,  3, cir);
+        R(  0,  35, 62,  3, cir);
+        R( -4,  -4,  3, 72, cir);    R(  4,  -4,  3, 72, cir);
+
+        // Épaules
+        R(-58,  -7, 22, 38, lit);    R( 58,  -7, 22, 38, lit);
+        // Bras
+        R(-72,  14, 14, 52, bdy);    R( 72,  14, 14, 52, bdy);
+        // Griffes
+        R(-80,  53,  8, 16, crown);  R(-68,  57,  8, 14, crown);
+        R( 68,  53,  8, 16, crown);  R( 80,  57,  8, 14, crown);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Générique — forme simple si un monstre inconnu est ajouté au CSV
+    // ─────────────────────────────────────────────────────────────────────────
+    else {
+        sf::Color c = (cat == "BOSS")     ? sf::Color(160, 28, 28) :
+                      (cat == "MINIBOSS") ? sf::Color(175,118, 18) :
+                                            sf::Color( 55,142, 52);
+        float r = (cat == "BOSS") ? 55.f : (cat == "MINIBOSS") ? 38.f : 25.f;
+        C( 0,  0, r, c);
+        C(-r*.4f, -r*.35f, r*.2f, sf::Color::White);
+        C( r*.4f, -r*.35f, r*.2f, sf::Color::White);
+    }
 }
 
 sf::Color JeuSFML::couleurHP(int hp, int hpMax) {
@@ -560,7 +750,10 @@ void JeuSFML::handleEventInventaire(const sf::Event& e) {
 // ─── COMBAT START ─────────────────────────────────────────────────────────────
 
 void JeuSFML::renderCombatStart() {
-    float cy = 200.f;
+    // Aperçu du monstre centré en haut de l'écran
+    dessinerMonstre(monstreCourant, WIN_W * 0.5f, 125.f);
+
+    float cy = 220.f;
     dessinerSeparateur(cy, sf::Color::Red); cy += 20.f;
 
     std::string titre = "COMBAT : " + joueur.getNom() +
@@ -637,6 +830,10 @@ void JeuSFML::renderCombatPrincipal() {
     y += 30.f;
 
     dessinerSeparateur(y); y += 20.f;
+
+    // Monstre — côté droit de l'écran, en dehors du HUD gauche
+    if (monstreCourant)
+        dessinerMonstre(monstreCourant, WIN_W - 158.f, 160.f);
 
     // ── Menu d'actions ──────────────────────────────────────────────────────────
     float cx = MARGIN;
