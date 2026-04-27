@@ -61,8 +61,16 @@ private:
     // Chaque entrée : ligne de texte décrivant un monstre vaincu
     std::vector<std::string> bestiaireLog;
 
+    // ── Pool de monstres disponibles (indices dans monstres[]) ───────────────────
+    std::vector<int> monstresDisponibles;
+    int monstreCourantIdx;
+
     // ── Compteur de frames (clignotement) ────────────────────────────────────────
     int frameCount;
+
+    // ── Animation de coup ────────────────────────────────────────────────────────
+    int hitAnimStart;   // frameCount au moment du coup (-1 = inactif)
+    int hitDamage;      // dégâts du coup (chiffre flottant)
 
     // ── État prochain après COMBAT_RESULT ────────────────────────────────────────
     GameState prochainEtat;
