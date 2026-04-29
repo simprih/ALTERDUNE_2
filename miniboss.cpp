@@ -5,6 +5,7 @@ using namespace std;
 MiniBoss::MiniBoss(string nom, int hp, int atk, int def, int mercyGoal, vector<string> actions)
     : Monstre(nom, "MINIBOSS", hp, atk, def, mercyGoal, actions) {
     nbActionsMax = 3;
+    if (actionsDisponibles.size() > 3) actionsDisponibles.resize(3); // max 3 actions pour un MINIBOSS
 }
 
 Monstre* MiniBoss::cloner() const {

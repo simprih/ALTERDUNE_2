@@ -5,6 +5,7 @@ using namespace std;
 Boss::Boss(string nom, int hp, int atk, int def, int mercyGoal, vector<string> actions)
     : Monstre(nom, "BOSS", hp, atk, def, mercyGoal, actions) {
     nbActionsMax = 4;
+    if (actionsDisponibles.size() > 4) actionsDisponibles.resize(4); // max 4 actions pour un BOSS
 }
 
 Monstre* Boss::cloner() const {
