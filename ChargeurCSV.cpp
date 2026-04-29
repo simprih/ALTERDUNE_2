@@ -19,13 +19,14 @@ vector<Item> ChargeurCSV::chargerItems(const string& fichier) {
     }
 
     string ligne;
-    getline(file, ligne); // on saute la première ligne (en-tête)
+    getline(file, ligne); // on saute la première ligne (en-tête CSV)
 
     while (getline(file, ligne)) {
+        // On enveloppe la ligne dans un flux pour pouvoir la découper champ par champ
         stringstream ss(ligne);
         string nom, type, valeurStr, quantiteStr;
 
-        // On découpe la ligne avec le séparateur ;
+        // getline avec délimiteur ';' extrait un champ à la fois — si un champ manque, ligne ignorée
         if (!getline(ss, nom, ';') ||
             !getline(ss, type, ';') ||
             !getline(ss, valeurStr, ';') ||
@@ -34,6 +35,7 @@ vector<Item> ChargeurCSV::chargerItems(const string& fichier) {
             continue;
         }
 
+        // stoi convertit la string en int — plantera si le CSV contient une valeur non numérique
         int valeur = stoi(valeurStr);
         int quantite = stoi(quantiteStr);
         items.push_back(Item(nom, type, valeur, quantite));
@@ -84,6 +86,8 @@ vector<Monstre*> ChargeurCSV::chargerMonstres(const string& fichier) {
 
         vector<string> actions;
 
+        // On instancie la bonne sous-classe selon la catégorie lue dans le CSV
+        // new alloue sur le tas — on stocke un pointeur de base Monstre* pour le polymorphisme
         if (categorie == "NORMAL") {
             actions = {act1, act2};
             monstres.push_back(new MonstreNormal(nom, hp, atk, def, mercyGoal, actions));

@@ -3,6 +3,8 @@
 using namespace std;
 
 Bestiaire::~Bestiaire() {
+    // On libère les copies de monstres qu'on a mises dans le bestiaire via cloner()
+    // p.first est le Monstre*, p.second est la string résultat ("Tue" / "Epargne")
     for (auto& p : monstresVaincus) {
         delete p.first;
     }
@@ -10,6 +12,7 @@ Bestiaire::~Bestiaire() {
 
 void Bestiaire::ajouterMonstre(Monstre* monstre, string resultat)
 {
+    // make_pair regroupe le pointeur et le résultat en une seule entrée du vecteur
     monstresVaincus.push_back(make_pair(monstre, resultat));
 }
 

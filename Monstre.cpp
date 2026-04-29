@@ -3,15 +3,16 @@
 using namespace std;
 
 Monstre::Monstre(string nom, string categorie, int hp, int atk, int def, int mercyGoal, vector<string> actions) {
+    // On utilise this-> pour lever l'ambiguïté entre les paramètres et les attributs du même nom
     this->nom = nom;
     this->categorie = categorie;
     this->hp = hp;
-    this->hpMax = hp;
+    this->hpMax = hp;   // hpMax sauvegarde les HP de départ pour les barres et le bestiaire
     this->atk = atk;
     this->def = def;
     this->mercy = 0;
     this->mercyGoal = mercyGoal;
-    this->nbActionsMax = 0;
+    this->nbActionsMax = 0; // sera défini par chaque sous-classe (2, 3 ou 4)
     this->actionsDisponibles = actions;
 }
 
@@ -36,6 +37,7 @@ bool Monstre::peutEtreEpargne() const {
 
 void Monstre::modifierMercy(int valeur) {
     mercy += valeur;
+    // On bride entre 0 et mercyGoal pour que la barre ne déborde jamais
     if (mercy < 0) mercy = 0;
     if (mercy > mercyGoal) mercy = mercyGoal;
 }

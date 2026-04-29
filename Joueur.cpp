@@ -47,11 +47,12 @@ void Joueur::subirDegats(int degats)
 void Joueur::soigner(int valeur)
 {
     hp += valeur;
-    if(hp>hpMax){hp = hpMax;}
+    if(hp>hpMax){hp = hpMax;} // on bride à hpMax pour ne pas dépasser le maximum
 }
 
 void Joueur::ajouterItem(Item& item)
 {
+    // Si l'item existe déjà dans l'inventaire, on empile la quantité plutôt que de créer un doublon
     for (Item& existing : inventaire) {
         if (existing.getNom() == item.getNom()) {
             existing.augmenterQuantite(item.getQuantite());
@@ -63,6 +64,7 @@ void Joueur::ajouterItem(Item& item)
 
 bool Joueur::utiliserItem(int index)
 {
+    // Le cast (int) évite un warning de comparaison signed/unsigned entre index et size()
     if(index < 0 || index >= (int)inventaire.size())
     {
         cout << "Item invalide." << endl;

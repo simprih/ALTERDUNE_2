@@ -43,13 +43,15 @@ class Monstre
     void afficherStats() const;
     void afficherResume() const;     // stats originales pour le bestiaire
 
-    // Méthode virtuelle pour que la méthode du bon type de monstre soit appelée
+    // = 0 rend la méthode purement virtuelle : Monstre ne peut pas être instancié directement
     virtual void afficher() const = 0;
 
-    // Crée une copie fraîche du monstre (HP et Mercy réinitialisés)
+    // cloner() retourne une copie via new — chaque combat repart sur un monstre à HP/Mercy pleins
+    // sans ça, un monstre déjà blessé conserverait ses dégâts d'un combat à l'autre
     virtual Monstre* cloner() const = 0;
 
-    // Destructeur virtuel car sinon le destructeur du monstre peut ne pas être appelé correctement
+    // Sans ce destructeur virtuel, supprimer un Monstre* qui pointe vers un MonstreNormal
+    // n'appellerait que ~Monstre et fuiterait la mémoire de la sous-classe
     virtual ~Monstre() {}
 
 };

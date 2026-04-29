@@ -17,6 +17,8 @@ void ActionACT::afficher() const {
 }
 
 const map<string, ActionACT>& ActionACT::getCatalogue() {
+    // static local : la map n'est construite qu'une seule fois au premier appel,
+    // puis réutilisée — c'est le pattern "singleton paresseux"
     static const map<string, ActionACT> catalogue = {
         {"COMPLIMENT",  ActionACT("COMPLIMENT",  "Vous faites un compliment sincere. Le monstre ne sait plus ou se mettre.", 20)},
         {"JOKE",        ActionACT("JOKE",        "Vous racontez une blague. Le monstre ricane malgre lui.", 15)},

@@ -21,7 +21,7 @@ static constexpr int          MAX_VIS = 22;
 // ─── Constructeur / Destructeur ───────────────────────────────────────────────
 
 JeuSFML::JeuSFML()
-    : rng(std::random_device{}()),
+    : rng(std::random_device{}()),  // std::random_device{}() donne une graine différente à chaque lancement
       etat(GameState::TITLE),
       monstreCourant(nullptr),
       tourConsomme(false),
@@ -43,6 +43,12 @@ JeuSFML::~JeuSFML() {
 
 bool JeuSFML::chargerPolice() {
     const std::vector<std::string> chemins = {
+        // Windows
+        "C:/Windows/Fonts/arial.ttf",
+        "C:/Windows/Fonts/Arial.ttf",
+        "C:/Windows/Fonts/cour.ttf",
+        "C:/Windows/Fonts/verdana.ttf",
+        // macOS
         "/System/Library/Fonts/Monaco.ttf",
         "/Library/Fonts/Arial.ttf",
         "/System/Library/Fonts/Supplemental/Arial.ttf",
@@ -76,7 +82,7 @@ void JeuSFML::demarrer() {
     etat = GameState::TITLE;
 
     while (window.isOpen()) {
-        ++frameCount;
+        ++frameCount; // compteur de frames, base de toutes les animations (sinf, clignotements...)
         while (const auto ev = window.pollEvent()) {
             if (ev->is<sf::Event::Closed>()) {
                 window.close();
@@ -147,6 +153,7 @@ void JeuSFML::dessinerLignes(const std::vector<std::string>& lignes,
                               sf::Color couleur, int offset, int maxVisible) {
     int n = (int)lignes.size();
     float lineH = (taille <= 16) ? LINE_SM : LINE_MD;
+    // On n'affiche que la fenêtre [offset, offset+maxVisible) — ça gère le défilement (scroll)
     for (int i = offset; i < n && i < offset + maxVisible; ++i) {
         dessinerTexte(lignes[i], taille, couleur,
                       x, y + (float)(i - offset) * lineH);
@@ -165,7 +172,7 @@ void JeuSFML::dessinerBarre(float x, float y, float w, float h,
 
     // Remplissage
     if (max > 0 && val > 0) {
-        float ratio = std::min(1.f, (float)val / (float)max);
+        float ratio = std::min(1.f, (float)val / (float)max); // std::min pour ne pas dépasser la largeur si val > max
         sf::RectangleShape barre({w * ratio, h});
         barre.setPosition({x, y});
         barre.setFillColor(fill);
@@ -195,17 +202,17 @@ void JeuSFML::dessinerSeparateur(float y, sf::Color couleur) {
 void JeuSFML::dessinerMonstre(const Monstre* m, float cx, float cy) {
     const std::string& cat = m->getCategorie();
     const std::string& nom = m->getNom();
-    float t   = static_cast<float>(frameCount) * 0.05f;
-    float cy0 = cy;
+    float t   = static_cast<float>(frameCount) * 0.05f; // t avance en continu → sinf(t) donne une oscillation fluide
+    float cy0 = cy; // cy0 reste fixe (le "sol"), cy va flotter — l'ombre reste au sol
 
-    // Taille proportionnelle aux HP
+    // Plus le monstre a de HP max, plus il est grand à l'écran — bridé entre 0.55 et 1.75
     float scale = 0.55f + static_cast<float>(m->getHpMax()) / 100.f * 0.85f;
     scale = std::max(0.55f, std::min(scale, 1.75f));
 
-    // Animation par catégorie
+    // Chaque catégorie a sa fréquence et amplitude de flottement différentes
     if      (cat == "NORMAL")   cy += sinf(t)        *  6.f;
-    else if (cat == "MINIBOSS") cy += sinf(t * 1.3f) * 10.f;
-    else                        cy += sinf(t * 0.6f) *  5.f;
+    else if (cat == "MINIBOSS") cy += sinf(t * 1.3f) * 10.f; // plus rapide et plus ample
+    else                        cy += sinf(t * 0.6f) *  5.f; // BOSS : lent et imposant
 
     // Ombre au sol
     {
@@ -217,7 +224,8 @@ void JeuSFML::dessinerMonstre(const Monstre* m, float cx, float cy) {
         window.draw(shad);
     }
 
-    // Helpers : rectangle et cercle centrés, scale appliqué
+    // Lambdas locales pour ne pas répéter les calculs de centrage et de scale à chaque forme
+    // dx/dy sont des offsets par rapport au centre (cx,cy), tout est mis à l'échelle via scale
     auto R = [&](float dx, float dy, float w, float h, sf::Color c) {
         sf::RectangleShape s({w * scale, h * scale});
         s.setPosition({cx + dx * scale - w * scale * .5f,
@@ -245,7 +253,7 @@ void JeuSFML::dessinerMonstre(const Monstre* m, float cx, float cy) {
 
     // ─── FROGGIT — crapaud des marais (NORMAL) ────────────────────────────────
     if (nom == "Froggit") {
-        float blink = (sinf(t * 4.f) > 0.85f) ? 0.f : 1.f;
+        float blink = (sinf(t * 4.f) > 0.85f) ? 0.f : 1.f; // les yeux se ferment brièvement quand sinf dépasse 0.85
         sf::Color body(25, 90, 20), belly(40, 125, 35), dark(10, 45, 8);
         sf::Color eyeC((int)(220 * blink), (int)(30 * (1.f - blink)), 10);
         sf::Color tooth(215, 205, 180);
@@ -285,7 +293,7 @@ void JeuSFML::dessinerMonstre(const Monstre* m, float cx, float cy) {
 
     // ─── SLIMETTE — blob acide (NORMAL) ──────────────────────────────────────
     else if (nom == "Slimette") {
-        float drip = std::abs(sinf(t * 1.8f));
+        float drip = std::abs(sinf(t * 1.8f)); // abs pour que les stalactites de slime ne "remontent" jamais
         sf::Color slime(28, 168, 12, 225), dslime(14, 95, 6, 215);
         sf::Color eyeC(235, 28, 8);
         C(0, 0, 32, slime); C(-14, -8, 18, slime); C(14, -8, 18, slime); C(0, -14, 20, slime);
@@ -301,7 +309,7 @@ void JeuSFML::dessinerMonstre(const Monstre* m, float cx, float cy) {
 
     // ─── SKELOX — squelette guerrier (NORMAL) ────────────────────────────────
     else if (nom == "Skelox") {
-        float flicker = (sinf(t * 5.f) > 0.7f) ? 1.f : 0.f;
+        float flicker = (sinf(t * 5.f) > 0.7f) ? 1.f : 0.f; // scintillement rapide des orbites — effet torche vacillante
         sf::Color bone(190, 182, 162), crack(125, 115, 100);
         sf::Color eyeC((int)(210 * flicker + 90), (int)(18 * flicker), (int)(170 * flicker));
         sf::Color tooth(210, 202, 180);
@@ -525,14 +533,15 @@ void JeuSFML::dessinerMonstre(const Monstre* m, float cx, float cy) {
 
 sf::Color JeuSFML::couleurHP(int hp, int hpMax) {
     if (hpMax <= 0) return sf::Color::Green;
-    float ratio = (float)hp / (float)hpMax;
-    if (ratio > 0.6f) return sf::Color::Green;
-    if (ratio > 0.3f) return sf::Color::Yellow;
-    return sf::Color::Red;
+    float ratio = (float)hp / (float)hpMax; // ratio entre 0 et 1 : 1 = plein, 0 = mort
+    if (ratio > 0.6f) return sf::Color::Green;  // > 60% : OK
+    if (ratio > 0.3f) return sf::Color::Yellow; // 30-60% : attention
+    return sf::Color::Red;                       // < 30% : danger
 }
 
 int JeuSFML::keyToInt(const sf::Event::KeyPressed& kp) {
     using K = sf::Keyboard::Key;
+    // Les touches numériques sont contiguës dans l'enum SFML, donc une soustraction suffit pour récupérer le chiffre
     if (kp.code >= K::Num1 && kp.code <= K::Num9)
         return (int)kp.code - (int)K::Num0;
     if (kp.code >= K::Numpad1 && kp.code <= K::Numpad9)
@@ -542,11 +551,13 @@ int JeuSFML::keyToInt(const sf::Event::KeyPressed& kp) {
 }
 
 int JeuSFML::calculerDegats(int hpMax) {
+    // Dégâts aléatoires entre 0 (raté) et hpMax — un BOSS peut se faire one-shot, c'est voulu
     std::uniform_int_distribution<int> dist(0, hpMax);
     return dist(rng);
 }
 
 void JeuSFML::appliquerDrop(const Monstre* monstre) {
+    // On tire un nombre entre 1 et 100 pour simuler un pourcentage de chance de drop
     std::uniform_int_distribution<int> roll(1, 100);
     int r = roll(rng);
     const std::string& cat = monstre->getCategorie();
@@ -554,13 +565,13 @@ void JeuSFML::appliquerDrop(const Monstre* monstre) {
     int valeur;
 
     if (cat == "NORMAL") {
-        if (r > 40) return;
+        if (r > 40) return;  // 40% de drop, items communs
         nom = "Snack"; type = "HEAL"; valeur = 8;
     } else if (cat == "MINIBOSS") {
-        if (r > 60) return;
+        if (r > 60) return;  // 60% de drop, items de mercy
         nom = "Cristal de Mercy"; type = "MERCY_BOOST"; valeur = 25;
     } else {
-        if (r > 80) return;
+        if (r > 80) return;  // 80% de drop pour les BOSS
         nom = "SuperPotion"; type = "HEAL"; valeur = 30;
     }
     Item drop(nom, type, valeur, 1);
@@ -597,7 +608,7 @@ void JeuSFML::renderTitre() {
     sub.setPosition({WIN_W / 2.f, by + 110.f});
     window.draw(sub);
 
-    // Texte clignotant
+    // Division entière par 30 (frames) puis modulo 2 → le texte alterne visible/invisible toutes les ~0.5s
     if ((frameCount / 30) % 2 == 0) {
         sf::Text hint(font, "Appuyez sur Entree pour commencer", FONT_SM);
         hint.setFillColor(sf::Color(150, 150, 150));
@@ -642,9 +653,10 @@ void JeuSFML::renderNomInput() {
 void JeuSFML::handleEventNomInput(const sf::Event& e) {
     if (auto* te = e.getIf<sf::Event::TextEntered>()) {
         char32_t c = te->unicode;
-        if (c == 8) {
+        if (c == 8) {  // code Unicode 8 = Backspace
             if (!inputBuffer.empty()) inputBuffer.pop_back();
         } else if (c >= 32 && c < 127 && inputBuffer.size() < 20) {
+            // On n'accepte que les caractères ASCII imprimables (32-126), pas les accents ni les emojis
             inputBuffer += static_cast<char>(c);
         }
     }
@@ -680,6 +692,7 @@ void JeuSFML::renderRecap() {
     dessinerTexte("Inventaire de depart :", FONT_MD,
                   sf::Color(180, 180, 180), MARGIN, y); y += LINE_MD;
 
+    // getInventaire() n'est pas const dans Joueur, d'où le const_cast pour pouvoir l'appeler depuis une fonction const
     const std::vector<Item>& inv = const_cast<Joueur&>(joueur).getInventaire();
     for (int i = 0; i < (int)inv.size(); ++i) {
         std::string ligne = "  " + std::to_string(i + 1) + ". " +
@@ -767,9 +780,11 @@ void JeuSFML::handleEventMenuPrincipal(const sf::Event& e) {
             break;
         case 2:
             if (!monstresDisponibles.empty()) {
+                // On pioche au hasard parmi les monstres pas encore rencontrés
                 std::uniform_int_distribution<int> dist(0, (int)monstresDisponibles.size() - 1);
                 monstreCourantIdx = monstresDisponibles[dist(rng)];
                 if (monstreCourant) { delete monstreCourant; }
+                // cloner() crée une copie fraîche avec HP/Mercy à fond — pas le pointeur d'origine
                 monstreCourant = monstres[monstreCourantIdx]->cloner();
                 tourConsomme = false;
                 hitAnimStart = -1;
@@ -1025,17 +1040,18 @@ void JeuSFML::renderCombatPrincipal() {
         float mcx = WIN_W * 0.5f;
         float mcy = y + logH * 0.58f;
 
+        // hitElapsed = nb de frames écoulées depuis le coup — 999 signifie "pas d'animation en cours"
         int hitElapsed = (hitAnimStart >= 0) ? (frameCount - hitAnimStart) : 999;
-        if (hitElapsed >= 45) hitAnimStart = -1;
+        if (hitElapsed >= 45) hitAnimStart = -1; // animation terminée, on réinitialise
 
-        // Tremblement pendant les 15 premières frames
+        // Tremblement pendant les 15 premières frames : sinf crée l'oscillation, (15-hitElapsed) l'amortit
         float shake = 0.f;
         if (hitElapsed < 15)
             shake = sinf(hitElapsed * 1.8f) * (15 - hitElapsed) * 0.85f;
 
         dessinerMonstre(monstreCourant, mcx + shake, mcy);
 
-        // Flash rouge sur le monstre (fondu rapide)
+        // Flash rouge sur le monstre : alpha diminue linéairement de 190 à 0 en 18 frames
         if (hitElapsed < 18) {
             float alpha = 190.f * (1.f - hitElapsed / 18.f);
             float sc = std::max(0.55f, std::min(0.55f + (float)monstreCourant->getHpMax() / 100.f * 0.85f, 1.75f));
@@ -1046,10 +1062,10 @@ void JeuSFML::renderCombatPrincipal() {
             window.draw(flash);
         }
 
-        // Chiffre de dégâts flottant (monte et disparaît)
+        // Le chiffre de dégâts monte (floatY décroît) et s'efface (alpha → 0) sur 45 frames
         if (hitElapsed < 45 && hitDamage > 0) {
-            uint8_t alpha = (uint8_t)std::max(0, 255 - hitElapsed * 6);
-            float floatY = mcy - 70.f - hitElapsed * 2.8f;
+            uint8_t alpha = (uint8_t)std::max(0, 255 - hitElapsed * 6); // transparence progressive
+            float floatY = mcy - 70.f - hitElapsed * 2.8f;              // montée à 2.8px/frame
             dessinerTexte("-" + std::to_string(hitDamage),
                          FONT_XL, sf::Color(255, 70, 40, alpha),
                          mcx - 22.f, floatY);
@@ -1108,6 +1124,8 @@ void JeuSFML::handleEventCombatPrincipal(const sf::Event& e) {
                                        "  ATK : " + std::to_string(monstreCourant->getAtk()));
                 bestiaireLog.push_back("");
                 bestiaire.ajouterMonstre(monstreCourant, "Tue");
+                // Idiome "erase-remove" : remove déplace les doublons en fin de vecteur,
+                // puis erase les supprime — un simple remove ne suffit pas sur un vector
                 monstresDisponibles.erase(
                     std::remove(monstresDisponibles.begin(), monstresDisponibles.end(), monstreCourantIdx),
                     monstresDisponibles.end());
@@ -1116,6 +1134,7 @@ void JeuSFML::handleEventCombatPrincipal(const sf::Event& e) {
                 messageLog += "\n  Monstre vaincu !";
                 messageLog += "\n  Victoires : " + std::to_string(joueur.getNbVictoires()) + "/10";
                 tourConsomme = false; // pas de contre-attaque
+                // prochainEtat est lu après la page de résultat pour savoir où aller ensuite
                 prochainEtat = (joueur.getNbVictoires() >= 10)
                                ? GameState::END_SCREEN : GameState::MAIN_MENU;
                 etat = GameState::COMBAT_RESULT;
@@ -1177,8 +1196,9 @@ void JeuSFML::handleEventCombatPrincipal(const sf::Event& e) {
             if (monstreCourant->getMercyGoal() > 0) {
                 float ratio = (float)monstreCourant->getMercy() /
                               (float)monstreCourant->getMercyGoal();
+                // Plus la mercy est remplie, plus le monstre a de chances d'hésiter à attaquer
                 int seuil = 0;
-                if (ratio >= 1.0f)       seuil = 75;
+                if (ratio >= 1.0f)       seuil = 75; // mercy pleine → 75% de chance de ne pas attaquer
                 else if (ratio >= 0.66f) seuil = 50;
                 else if (ratio >= 0.33f) seuil = 25;
                 if (seuil > 0) {
@@ -1397,6 +1417,7 @@ void JeuSFML::renderCombatResultat() {
     std::string line;
     while (std::getline(ss, line)) {
         sf::Color c = sf::Color::White;
+        // On colore chaque ligne du log selon son contenu — simple mais efficace
         if (line.find("degats") != std::string::npos)  c = sf::Color::Red;
         if (line.find("Mercy")  != std::string::npos)  c = sf::Color::Yellow;
         if (line.find("laisse") != std::string::npos)  c = sf::Color::Green;
@@ -1447,7 +1468,7 @@ void JeuSFML::renderFin() {
 
     dessinerSeparateur(y); y += 20.f;
 
-    // Type de fin
+    // L'ending dépend du comportement du joueur tout au long de la partie
     if (!joueur.estVivant()) {
         dessinerTexte("Vous avez ete vaincu.", FONT_LG,
                       sf::Color::Red, MARGIN, y); y += 40.f;
