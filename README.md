@@ -4,15 +4,24 @@ A turn-based combat RPG written from scratch in C++17, with both a terminal and 
 
 Built as an object-oriented programming project at ESILV (Léonard de Vinci Graduate School of Engineering), April 2026.
 
-<!-- Add a screenshot here: drag an image into this file on GitHub and it will upload automatically -->
-<img width="1680" height="1050" alt="image" src="https://github.com/user-attachments/assets/0b8195ff-c72d-4fc8-bd3b-64acfeb1b9a8" />
-
+![ALTERDUNE combat screen](https://github.com/user-attachments/assets/0b8195ff-c72d-4fc8-bd3b-64acfeb1b9a8)
 
 ## Gameplay
 
 Combat is turn-based against three tiers of enemies — regular monsters, minibosses and bosses. Each turn the player chooses to fight, use an item, or ACT.
 
-The ACT system is the core mechanic: instead of only reducing an enemy's HP, the player can raise a **mercy** counter through non-violent actions (`COMPLIMENT`, `JOKE`, `DANCE`, `PET`, `OBSERVE`, `REASON`, `OFFER_SNACK`). Each enemy responds to its own subset of actions, so every fight can be resolved by force or by persuasion.
+The ACT system is the core mechanic: instead of only reducing an enemy's HP, the player can raise a **mercy** counter until it reaches that enemy's `mercyGoal`, at which point the enemy can be spared. Every fight is therefore winnable by force or by persuasion.
+
+Each enemy exposes its own subset of actions, and the number available scales with its tier — two for regular monsters, three for minibosses, four for bosses:
+
+| Action | Notes |
+|---|---|
+| `COMPLIMENT`, `JOKE`, `DANCE`, `PET`, `DISCUSS`, `OFFER_SNACK` | Standard mercy-building actions |
+| `OBSERVE` | Minibosses only |
+| `REASON` | Bosses only |
+| `INSULT` | Bosses only — mercy impact can be negative, so it reads as a risk/reward option |
+
+Because actions carry a signed `impactMercy`, the right approach differs per enemy rather than being a single dominant strategy.
 
 ## Architecture
 
