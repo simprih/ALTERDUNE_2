@@ -5,7 +5,8 @@ A turn-based combat RPG written from scratch in C++17, with both a terminal and 
 Built as an object-oriented programming project at ESILV (Léonard de Vinci Graduate School of Engineering), April 2026.
 
 <!-- Add a screenshot here: drag an image into this file on GitHub and it will upload automatically -->
-<!-- ![Gameplay](screenshot.png) -->
+<img width="1680" height="1050" alt="image" src="https://github.com/user-attachments/assets/afc9f456-2ed8-466c-9037-64eb58046dc7" />
+
 
 ## Gameplay
 
